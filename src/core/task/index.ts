@@ -1,6 +1,7 @@
 import { setTimeout as setTimeoutPromise } from "node:timers/promises"
 import { ApiHandler, ApiProviderInfo, buildApiHandler } from "@core/api"
 import { ApiStream } from "@core/api/transform/stream"
+import { ArchitectOrchestrator } from "@core/architect/ArchitectOrchestrator"
 import { AssistantMessageContent, parseAssistantMessageV2, ToolUse } from "@core/assistant-message"
 import { ContextManager } from "@core/context/context-management/ContextManager"
 import { checkContextWindowExceededError } from "@core/context/context-management/context-error-handling"
@@ -1326,7 +1327,142 @@ export class Task {
 		await this.initiateTaskLoop(newUserContent)
 	}
 
+	/**
+	 * Run Architect Mode - two-model workflow with Architect + Editor
+	 */
+	private async runArchitectMode(userContent: ClineContent[]): Promise<void> {
+		const architectConfig = this.stateManager.getGlobalSettingsKey("architectConfig")
+		
+		if (!architectConfig?.enabled) {
+			// Fallback to normal mode
+			await this.recursivelyMakeClineRequests(userContent, true)
+			return
+		}
+
+		// Build codebase context for architect
+		const codebaseContext = await this.getEnvironmentDetails(true)
+
+		// Extract task from user content
+		const taskText = userContent
+			.filter((block) => block.type === "text")
+			.map((block) => ("text" in block ? block.text : ""))
+			.join("\n")
+
+		try {
+			const apiConfiguration = this.stateManager.getApiConfiguration()
+			const apiKey =
+				apiConfiguration.apiKey ||
+				apiConfiguration.openRouterApiKey ||
+				"" // Use configured API key
+
+			const orchestrator = new ArchitectOrchestrator(
+				architectConfig,
+				apiConfiguration,
+				apiKey,
+				this.cwd
+			)
+
+			// Stream architect updates to UI
+			for await (const update of orchestrator.run(taskText, codebaseContext)) {
+				if (this.taskState.abort) {
+					break
+				}
+
+				switch (update.type) {
+					case "phase":
+						await this.say(
+							"architect_phase",
+							JSON.stringify({
+								phase: update.phase,
+								iteration: update.iteration,
+							})
+						)
+						break
+
+					case "thinking":
+						await this.say("architect_thinking", update.content)
+						break
+
+					case "plan":
+						await this.say(
+							"architect_plan",
+							JSON.stringify({
+								content: update.content,
+								thinking: update.thinking,
+								iteration: this.taskState.apiRequestCount,
+							})
+						)
+						break
+
+					case "implementation":
+						await this.say(
+							"architect_implementation",
+							JSON.stringify({
+								content: update.content,
+								iteration: this.taskState.apiRequestCount,
+							})
+						)
+						break
+
+					case "evaluation":
+						const approved = update.content.toUpperCase().startsWith("APPROVED")
+						await this.say(
+							"architect_evaluation",
+							JSON.stringify({
+								content: update.content,
+								thinking: update.thinking,
+								iteration: this.taskState.apiRequestCount,
+								approved,
+							})
+						)
+						break
+
+					case "complete":
+					case "max_iterations":
+						await this.say(
+							"architect_complete",
+							JSON.stringify({
+								iterations: update.iterations,
+								success: update.type === "complete",
+							})
+						)
+						break
+
+					case "approval_request":
+						// Handle approval requests from ApprovalOracle
+						await this.say(
+							"info",
+							`Approval: ${update.action} on ${update.target}`
+						)
+						break
+
+					case "architecture_review":
+						// Handle architecture warnings
+						await this.say("info", update.message)
+						break
+				}
+			}
+		} catch (error) {
+			await this.say(
+				"error",
+				`Architect Mode failed: ${error instanceof Error ? error.message : String(error)}`
+			)
+			// Fallback to normal mode
+			await this.recursivelyMakeClineRequests(userContent, true)
+		}
+	}
+
 	private async initiateTaskLoop(userContent: ClineContent[]): Promise<void> {
+		// Check if Architect Mode is enabled
+		const architectConfig = this.stateManager.getGlobalSettingsKey("architectConfig")
+		
+		if (architectConfig?.enabled) {
+			// Use Architect Mode (two-context workflow)
+			await this.runArchitectMode(userContent)
+			return
+		}
+
+		// Normal mode (existing code)
 		let nextUserContent = userContent
 		let includeFileDetails = true
 		while (!this.taskState.abort) {

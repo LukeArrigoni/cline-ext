@@ -1,5 +1,6 @@
 import { AutoApprovalSettings } from "@shared/AutoApprovalSettings"
 import { ApiProvider, ModelInfo, type OcaModelInfo } from "@shared/api"
+import { ArchitectConfig } from "@shared/architect-types"
 import { BrowserSettings } from "@shared/BrowserSettings"
 import { ClineRulesToggles } from "@shared/cline-rules"
 import { DictationSettings } from "@shared/DictationSettings"
@@ -131,6 +132,7 @@ export interface Settings {
 	subagentsEnabled: boolean
 	enableParallelToolCalling: boolean
 	backgroundEditEnabled: boolean
+	architectConfig: ArchitectConfig
 
 	// Model-specific settings
 	hicapModelId: string | undefined

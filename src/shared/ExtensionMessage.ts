@@ -181,6 +181,12 @@ export type ClineSay =
 	| "task_progress"
 	| "hook"
 	| "hook_output"
+	| "architect_phase"
+	| "architect_thinking"
+	| "architect_plan"
+	| "architect_implementation"
+	| "architect_evaluation"
+	| "architect_complete"
 
 export interface ClineSayTool {
 	tool:
@@ -229,6 +235,29 @@ export interface ClineSayHook {
 		details?: string // Technical details for expansion
 		scriptPath?: string // Path to the hook script
 	}
+}
+
+export interface ClineSayArchitectPhase {
+	phase: "planning" | "implementing" | "evaluating" | "complete" | "failed"
+	iteration: number
+}
+
+export interface ClineSayArchitectPlan {
+	content: string
+	thinking?: string
+	iteration: number
+}
+
+export interface ClineSayArchitectImplementation {
+	content: string
+	iteration: number
+}
+
+export interface ClineSayArchitectEvaluation {
+	content: string
+	thinking?: string
+	iteration: number
+	approved: boolean
 }
 
 // must keep in sync with system prompt

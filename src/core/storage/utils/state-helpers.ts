@@ -1,4 +1,5 @@
 import { ANTHROPIC_MIN_THINKING_BUDGET, ApiProvider, fireworksDefaultModelId, type OcaModelInfo } from "@shared/api"
+import { DEFAULT_ARCHITECT_CONFIG } from "@shared/architect-types"
 import { GlobalStateAndSettings, LocalState, SecretKey, Secrets } from "@shared/storage/state-keys"
 import { ExtensionContext } from "vscode"
 import { Controller } from "@/core/controller"
@@ -324,6 +325,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 		const subagentsEnabled = context.globalState.get<GlobalStateAndSettings["subagentsEnabled"]>("subagentsEnabled")
 		const backgroundEditEnabled =
 			context.globalState.get<GlobalStateAndSettings["backgroundEditEnabled"]>("backgroundEditEnabled")
+		const architectConfig = context.globalState.get<GlobalStateAndSettings["architectConfig"]>("architectConfig")
 
 		// Get mode-related configurations
 		const mode = context.globalState.get<GlobalStateAndSettings["mode"]>("mode")
@@ -718,6 +720,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 			openTelemetryLogMaxQueueSize: openTelemetryLogMaxQueueSize ?? 2048,
 			remoteRulesToggles: remoteRulesToggles || {},
 			remoteWorkflowToggles: remoteWorkflowToggles || {},
+			architectConfig: architectConfig || DEFAULT_ARCHITECT_CONFIG,
 		}
 	} catch (error) {
 		console.error("[StateHelpers] Failed to read global state:", error)
