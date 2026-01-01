@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.vsix
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+.nyc_output/
+
+# Test outputs
+coverage/
+test-results/
+
+# Generated
+*.d.ts.map
+src/generated/
+
+# Large binary assets in cline-extended
+cline-extended/node_modules/
+cline-extended/dist/
+cline-extended/webview-ui/node_modules/
+cline-extended/webview-ui/build/
+cline-extended/.vscode-test/
+cline-extended/out/
+
+# MCP server
+mcp-approval-oracle/node_modules/
+mcp-approval-oracle/dist/
