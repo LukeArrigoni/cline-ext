@@ -1,0 +1,66 @@
+# LLM Context Checkpoint
+# Last updated: 2024-12-31
+
+session:
+  status: active
+  last_action: "Installed cline-extended-1.0.0.vsix in Cursor"
+
+project:
+  name: cline-ext
+  type: VS Code extension fork
+  repo: https://github.com/LukeArrigoni/cline-ext
+  description: |
+    Cline Extended - a fork of Cline with Architect Mode, ApprovalOracle,
+    and LLM context checkpointing. Designed for rapid startup development.
+
+completed_tasks:
+  - Created full Cline Extended implementation from specs
+  - Built mcp-approval-oracle standalone server (later removed)
+  - Implemented Architect Mode (Opus plans, Sonnet implements)
+  - Implemented ApprovalOracle with pattern matching
+  - Implemented PersonaLoader for .cline/persona.md injection
+  - Implemented ArchitectureAnalyzer for domain boundary checks
+  - Implemented LLMContextManager for session persistence
+  - Created ArchitectModeSection.tsx settings UI
+  - Fixed all TypeScript compilation errors
+  - Built and packaged cline-extended-1.0.0.vsix (9.43 MB)
+  - Simplified repo structure (removed mcp-approval-oracle, flattened cline-extended to root)
+  - Updated README with fork rationale and startup focus
+  - Pushed to GitHub (2 commits on main branch)
+  - Installed extension in Cursor
+
+pending_tasks:
+  - Create GitHub release with VSIX (blocked: gh CLI needs auth in this shell)
+  - Test extension in Cursor after reload
+
+hot_files:
+  - readme.md  # Updated with fork rationale
+  - src/core/architect/ArchitectOrchestrator.ts  # Main orchestration logic
+  - src/core/approval/ApprovalOracle.ts  # Action approval
+  - webview-ui/src/components/settings/sections/ArchitectModeSection.tsx  # Settings UI
+  - cline-extended-1.0.0.vsix  # Built extension package
+
+key_decisions:
+  - Removed standalone mcp-approval-oracle (ApprovalOracle is built into extension)
+  - Flattened repo structure (cline-extended contents moved to root)
+  - Used local React state for Architect settings (not wired to proto yet)
+  - Target audience: Startups for rapid development, not enterprise
+
+blockers:
+  - GitHub CLI auth not persisting to Claude's shell session
+  - Need to create GitHub release manually or re-auth gh CLI
+
+next_steps:
+  1. User reloads Cursor to test Cline Extended
+  2. Create GitHub release with VSIX when auth issue resolved
+  3. Test Architect Mode functionality
+
+git_state:
+  branch: main
+  remote: origin (https://github.com/LukeArrigoni/cline-ext.git)
+  last_commit: "Simplify repo structure as Cline fork"
+  status: clean (all changes committed and pushed)
+
+user_info:
+  name: Luke Arrigoni
+  email: luke@arricor.com
